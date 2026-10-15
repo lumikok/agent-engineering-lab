@@ -1,4 +1,4 @@
-# Agent Engineering Learning Lab
+# Agent Engineering Lab
 
 个人 Agent 工程学习仓库，保存代码实验、必要说明和可复现的实践成果。
 
@@ -29,5 +29,7 @@ python -X utf8 .\01-reliable-call\main.py
 长期知识总结另行整理。仓库保存代码、必要说明、人工构造的评测案例和适合公开的实验报告；密钥、原始响应日志、个人数据、模型权重和批量生成文件不提交。
 
 ## 学习资源
+
+完整路线与阶段实践目标见 [ROADMAP.md](ROADMAP.md)。按“真实调用链路 → 调用可靠性与结构化输出 → 工具循环 → 工作流与框架 → 状态控制 → RAG与权限 → 综合交付与独立迁移”连续推进。
 
 [Microsoft AI Agents for Beginners](https://github.com/microsoft/ai-agents-for-beginners) 提供概念、代表示例与覆盖参考，配合实际使用的模型服务、SDK 和工程工具官方文档。练习实现注明其来源，不把本地改写或模拟实验记作官方云服务实验完成。
