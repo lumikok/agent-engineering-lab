@@ -8,13 +8,19 @@
 
 | 单元 | 内容 | 当前范围 |
 |---|---|---|
-| [01-reliable-call](01-reliable-call/README.md) | 可靠调用的起步实验 | 本地模拟提供者、异常处理与响应校验，包含坏响应对照 |
+| [01-reliable-call](01-reliable-call/README.md) | 可靠调用的起步实验 | 消息/响应校验、本地HTTP请求、真实等待超时与坏响应对照 |
 
-目前尚未接入真实模型服务。主动抛出 `TimeoutError` 用于观察错误路径，不代表已经实现网络超时、重试或取消。
+目前使用本地回显服务。保留的fake示例通过主动抛出异常模拟失败；HTTP对照则通过服务延迟观察真实等待超时。真实模型接入、自动重试和取消仍待后续实验。
 
 ## 运行
 
-当前实验仅使用 Python 标准库，在仓库根目录运行：
+当前实验仅使用 Python 标准库。在仓库根目录打开两个终端，第一个启动本地服务：
+
+```powershell
+python -X utf8 .\01-reliable-call\local_server.py
+```
+
+第二个运行客户端；结束实验后，在服务端终端按 Ctrl+C 停止服务：
 
 ```powershell
 python -X utf8 .\01-reliable-call\main.py
