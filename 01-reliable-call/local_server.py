@@ -1,4 +1,4 @@
-"""本地 HTTP 实验服务。AI 提供服务端样板，学习者实现客户端调用。
+"""本地HTTP实验服务：提供回显、慢响应及不合格响应。
 
 参考：https://docs.python.org/3.14/library/http.server.html
 服务只生成回显文本，不调用模型。
