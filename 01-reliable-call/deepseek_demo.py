@@ -20,16 +20,22 @@ from main import validate_messages, validate_response
 
 from retry_demo import call_with_retry
 
-def deepseek_provider(messages, api_key, model="deepseek-flash", timeout=30.0):
+# 调用DeepSeek接口
+def deepseek_provider(messages, api_key, model="deepseek-flash", timeout=30.0,response_format=None):
     """发送非流式请求，返回解析后的原始响应字典。"""
 
     validate_messages(messages)
-    body = json.dumps({"model": model,
-                       "messages": messages,
-                       "stream": False,
-                       "thinking": {"type": "disabled"},
-                       "max_tokens": 128,
-                       })
+    body = ({"model": model,
+            "messages": messages,
+            "stream": False,
+            "thinking": {"type": "disabled"},
+            "max_tokens": 128,
+                })
+    # 如果指定了response_format，则在请求体中添加response_format字段
+    if response_format is not None:
+        body.update({"response_format": response_format})
+
+    body = json.dumps(body, ensure_ascii=False)
     request = Request(
         url="https://api.deepseek.com/chat/completions",
         data=body.encode("utf-8"),
