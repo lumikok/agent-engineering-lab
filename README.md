@@ -6,11 +6,28 @@
 
 ## 当前内容
 
-| 单元 | 内容 | 当前范围 |
-|---|---|---|
+| 单元                                           | 内容               | 当前范围                                              |
+| ---------------------------------------------- | ------------------ | ----------------------------------------------------- |
 | [01-reliable-call](01-reliable-call/README.md) | 可靠调用的起步实验 | 消息/响应校验、本地HTTP请求、真实等待超时与坏响应对照 |
+| [02-structured-output](02-structured-output/) | 结构化输出练习 | 真实JSON模式调用、回答提取与业务字段校验 |
+| [03-tool-calling](03-tool-calling/README.md) | 只读工具调用 | 主题查询、参数校验、结果回送与有界循环 |
 
-目前使用本地回显服务。保留的fake示例通过主动抛出异常模拟失败；HTTP对照则通过服务延迟观察真实等待超时。真实模型接入、自动重试和取消仍待后续实验。
+## 代码阅读顺序
+
+| 序号 | 文件 | 内容 |
+| --- | --- | --- |
+| 01.01 | [main.py](01-reliable-call/main.py) | 消息/响应校验、模拟提供者与HTTP客户端 |
+| 01.02 | [local_server.py](01-reliable-call/local_server.py) | 本地HTTP对照服务 |
+| 01.03 | [deepseek_demo.py](01-reliable-call/deepseek_demo.py) | DeepSeek真实调用入口 |
+| 01.04 | [retry_demo.py](01-reliable-call/retry_demo.py) | 错误分类、有限重试与受控场景 |
+| 02.01 | [01-structured_demo.py](02-structured-output/01-structured_demo.py) | 真实结构化回复的解析与校验练习 |
+| 03.01 | [01-tool_demo.py](03-tool-calling/01-tool_demo.py) | 本地题库查询与真实工具调用闭环 |
+
+目录编号表示学习单元，表中编号表示单元内的阅读顺序。可靠调用单元的脚本保留原文件名，使现有模块导入继续有效。
+
+结构化输出练习入口：`python -X utf8 .\02-structured-output\01-structured_demo.py`。脚本从环境变量`DEEPSEEK_API_KEY`或隐藏输入读取密钥，先运行本地解析用例，再发送真实请求；未说明的练习数量保留为`null`，解析后为`None`。
+
+本地回显服务用于HTTP对照，保留的fake示例通过主动抛出异常模拟失败。真实模型接入、基础有限重试、结构化业务结果和最小只读工具调用已实现；JSON可解析与业务字段合格分别检查，HTTP重试不包含本地业务校验。取消尚未实现；工具实验的运行和上限见[单元说明](03-tool-calling/README.md)。
 
 ## 运行
 
@@ -35,7 +52,5 @@ python -X utf8 .\01-reliable-call\main.py
 长期知识总结另行整理。仓库保存代码、必要说明、人工构造的评测案例和适合公开的实验报告；密钥、原始响应日志、个人数据、模型权重和批量生成文件不提交。
 
 ## 学习资源
-
-完整路线与阶段实践目标见 [ROADMAP.md](ROADMAP.md)。按“真实调用链路 → 调用可靠性与结构化输出 → 工具循环 → 工作流与框架 → 状态控制 → RAG与权限 → 综合交付与独立迁移”连续推进。
 
 [Microsoft AI Agents for Beginners](https://github.com/microsoft/ai-agents-for-beginners) 提供概念、代表示例与覆盖参考，配合实际使用的模型服务、SDK 和工程工具官方文档。练习实现注明其来源，不把本地改写或模拟实验记作官方云服务实验完成。

@@ -49,4 +49,6 @@ htmlcov/
 Thumbs.db
 .DS_Store
 
+已学课程记录.md
+
 # Track pyproject.toml, uv.lock, synthetic evaluation cases and selected reports.
