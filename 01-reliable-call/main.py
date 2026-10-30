@@ -51,12 +51,38 @@ def validate_messages(messages):
             raise ValueError("消息不是字典类型")
         if "role" not in me or "content" not in me:
             raise ValueError("消息缺少 role 或 content 字段")
-        if not isinstance(me["role"], str) or not isinstance(me["content"], str):
-            raise ValueError("消息的 role 或 content 字段不是字符串类型")
-        if me["content"].strip() == "":
-            raise ValueError("消息的 content 字段为空字符串")
-        if me["role"] not in ["system", "user", "assistant"]:
+        role = me["role"]
+        content = me["content"]
+        if not isinstance(role, str):
+            raise ValueError("消息的 role 字段不是字符串类型")
+        if role not in ["system", "user", "assistant", "tool"]:
             raise ValueError("消息的 role 字段不是有效值")
+
+        # 处理tool消息的特殊情况
+        if role == "tool":
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("tool消息的 content 字段必须是非空字符串")
+            tool_call_id = me.get("tool_call_id")
+            if not isinstance(tool_call_id, str) or not tool_call_id.strip():
+                raise ValueError("tool消息的 tool_call_id 字段必须是非空字符串")
+        # 处理带工具调用的 assistant 消息
+        elif role == "assistant":
+            tool_calls = me.get("tool_calls")
+
+            # 检查 tool_calls 字段是否为列表
+            if tool_calls is not None and not isinstance(tool_calls, list):
+                raise ValueError("assistant消息的 tool_calls 必须是列表")
+
+            # tool_calls为非空列表时，content可以为None或字符串；为空列表时，content必须为非空字符串
+            if tool_calls:
+                if content is not None and not isinstance(content, str):
+                    raise ValueError("assistant消息的 content 必须是字符串类型或 None")
+            else:
+                if not isinstance(content, str) or not content.strip():
+                    raise ValueError("assistant消息的 content 必须是非空字符串")
+        else:
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("消息的 content 必须是非空字符串")
     return messages
 
 # 模拟提供者
