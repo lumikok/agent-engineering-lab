@@ -20,7 +20,7 @@ EXERCISE_BANK = {
 }
 
 # tool-function -> 根据主题获取题目列表
-def get_exercise_list(topic):
+def get_exercise_list(topic,limit=None):
     """根据主题获取题目列表"""
     if not isinstance(topic, str):
         raise ValueError("主题必须是字符串类型")
@@ -30,7 +30,12 @@ def get_exercise_list(topic):
     topic = topic.strip()
     if topic not in EXERCISE_BANK:
         raise ValueError(f"主题 '{topic}' 不存在于题库中")
-    return EXERCISE_BANK.get(topic, [])
+    if limit is not None and (type(limit) is not int or limit <= 0):
+        raise ValueError("limit 必须是正整数，不能是布尔值或其他类型")
+    exercises = EXERCISE_BANK.get(topic, [])
+    if limit is not None:
+        exercises = exercises[:limit]
+    return exercises
 
 # 工具描述
 TOOLS = [
@@ -45,6 +50,10 @@ TOOLS = [
                     "topic": {
                         "type": "string",
                         "description": "练习主题，例如二分查找或排序",
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "返回的练习数量限制，省略时则返回所有练习，如果数量不足时返回所有练习并告知用户数量不足",
                     }
                 },
                 "required": ["topic"],
@@ -78,15 +87,22 @@ def execute_tool(tool_call):
             arguments = json.loads(arguments_text)
         except json.JSONDecodeError as e:
             return {"error": f"工具调用请求中 'arguments' 字段必须是有效的JSON格式: {e}"}
-        if isinstance(arguments, dict) and set(arguments) == {"topic"}:
+        # 键集合必须是 {"topic"} 或 {"topic", "limit"}
+        if isinstance(arguments, dict) and (set(arguments.keys()) == {"topic"} or set(arguments.keys()) == {"topic","limit"}):
             topic = arguments["topic"]
+            if "limit" in arguments:
+                if arguments["limit"] is None:
+                    return {"error": "limit 参数不能为显示null"}
+                limit = arguments["limit"]
+            else:
+                limit = None
             try:
-                exercises = get_exercise_list(topic)
+                exercises = get_exercise_list(topic, limit=limit)
                 return {"exercises": exercises}
             except ValueError as e:
                 return {"error": str(e)}
         else:
-            return {"error": "参数格式错误，必须包含只有'topic'"}
+            return {"error": "参数格式错误，必须包含'topic'"}
     else:
         return {"error": f"未知的工具调用: {function_name}"}
 
@@ -132,7 +148,11 @@ def run_tool_loop(messages, api_key, provider=tool_provider, max_rounds=3):
             # 逐条执行工具调用并追加对应结果
             for tool_call in tool_calls:
                 result = execute_tool(tool_call)
-                print("工具调用结果：", json.dumps(result, ensure_ascii=False))
+                label = f"第{round_num}轮 | 调用{tool_call['id']} | {tool_call['function']['name']}"
+                if "error" in result:
+                    print(f"{label} | 拒绝：{result['error']}")
+                else:
+                    print(f"{label} | 成功：返回{len(result['exercises'])}道练习")
 
                 messages.append({
                     "role": "tool",
@@ -154,6 +174,8 @@ def run_tool_loop(messages, api_key, provider=tool_provider, max_rounds=3):
 
 # 运行入口
 if __name__ == "__main__":
+    """本地检查get_exercise_list函数"""
+
     topics = ["二分查找", "排序", "不存在的主题"]
     for topic in topics:
         try:
@@ -164,6 +186,15 @@ if __name__ == "__main__":
                 print(f"主题: {topic}, 题目列表为空")
         except ValueError as e:
             print(f"主题: {topic}, 错误: {e}")
+
+    """本地检查limit参数"""
+    limits = [None, 1, 2, 10, -1, True, False]
+    for limit in limits:
+        try:
+            exercises = get_exercise_list("二分查找", limit=limit)
+            print(f"limit: {limit}, 题目列表: {exercises}")
+        except ValueError as e:
+            print(f"limit: {limit}, 错误: {e}")
     # 调用DeepSeek接口，传入工具列表
     api_key = os.getenv("DEEPSEEK_API_KEY") or getpass("DeepSeek API key: ")
 
